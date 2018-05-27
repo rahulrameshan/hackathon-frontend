@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "../containers/Login.css";
+import {serverlocation} from "../utils"
 
 export default class Login extends Component {
     constructor(props) {
@@ -26,25 +27,34 @@ export default class Login extends Component {
     handleSubmit = event => {
         let self=this;
         event.preventDefault();
-        fetch('http://127.0.0.1:8000/signup/', {
+        fetch('http://192.168.0.21:9000/i-am-me/', {
             method: 'POST',
             crossDomain: true,
             //credentials: 'include',
             body: JSON.stringify({
-                title: this.state.email,
-                description: this.state.password
+                username: this.state.email,
+                password: this.state.password
             })
         })
-            .then(function(response) {
-                if(response.status===200){
-                    console.log("200 status");
-                    response.json().then(function (object){
-                        console.log("object", object);
-                    })
-                    self.props.setlogin(1)
-                }
-            })
+                .then(function(response) {
+                    response.text().then(function (object){
+                    var obj = JSON.parse(object);
+                     console.log("obj succesas", obj["success"])
+                     if(obj['success']==true){
+                         console.log("if condition called");
+                         self.props.setlogin(1);
+                         localStorage.setItem('username',self.state.email);
+                     }
+                     else{
+                         console.log('else condition');
+                     }
+
+
+                })
+
+             });
     }
+
 
     render() {
         console.log("state", this.state.loggedin);

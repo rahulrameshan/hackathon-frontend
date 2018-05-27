@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "../bootstrap.css"
-
+import {serverlocation} from "../utils"
 
 export default class QuestDetail extends Component {
     constructor(props) {
@@ -9,7 +9,10 @@ export default class QuestDetail extends Component {
 
         this.state = {
             select:"",
-            Description:""
+            Description:"",
+            filename:"",
+            result:"",
+            output:""
 
 
         };
@@ -19,41 +22,43 @@ export default class QuestDetail extends Component {
     }
 
     validateForm() {
-        return this.state.Description.length > 0 && this.state.select.length > 0
+        return this.state.Description.length > 0 && this.state.select.length > 0 && this.state.filename.length > 0
     }
 
     handleChange = event => {
         console.log("event",event);
         this.setState({
-            [event.target.id]: event.target.value
+            [event.target.id]: event.target.value,
+            result:"", output:""
         });
     }
 
     handleSubmit = event => {
-        console.log("select val",this.state.select)
+        let username= localStorage.getItem('username');
         let self=this;
         event.preventDefault();
-        fetch('http://127.0.0.1:8000/program/', {
+        fetch(serverlocation+'compile/', {
             method: 'POST',
             crossDomain: true,
             //credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            // headers: {
+            //     'Content-Type': 'application/json',
+            // },
             body: JSON.stringify({
-                language: this.state.select,
-                description: this.state.Description
+                lang: this.state.select,
+                script: this.state.Description,
+                qn_id:this.props.id,
+                filename:this.state.filename,
+                username:username
             })
         })
             .then(function(response) {
-                if(response.status===200){
-                    console.log("200 status");
-                    response.json().then(function (object){
-                        console.log("object", object);
-                    })
+                response.text().then(function (object){
+                    var obj = JSON.parse(object);
+                    self.setState({result:obj['message'], output:obj['output']})
+                })
 
-                }
-            })
+            });
     }
 
     render(){
@@ -65,13 +70,27 @@ export default class QuestDetail extends Component {
                 <FormControl componentClass="select" placeholder="select"
                              onChange={this.handleChange}>
                     <option value="">Select Any value</option>
-                    <option value="Python">Python</option>
-                    <option value="Java">Java</option>
-                    <option value="C++">C++</option>
-                    <option value="C">C</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="c++">C++</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="go">go</option>
+                    <option value="elixir">elixir</option>
+                    <option value="lisp">lisp</option>
+                    <option value="cobol">cobol</option>
 
                 </FormControl>
             </FormGroup>
+
+                <FormGroup controlId="filename" bsSize="large">
+                    <ControlLabel>Your FileName</ControlLabel>
+                    <FormControl
+                        autoFocus
+                        type="text"
+                        value={this.state.filename}
+                        onChange={this.handleChange}
+                    />
+                </FormGroup>
 
 
                 <FormGroup controlId="Description" bsSize="large">
@@ -97,10 +116,25 @@ export default class QuestDetail extends Component {
             </form>
             </div>
                    )
+
+            let pretag=""
+            if(this.state.output!=="")
+            {
+                pretag=(<pre>{this.state.output}</pre>)
+
+            }
         return(<div><h1>{this.props.title}</h1>
+
             <p>{this.props.desc}</p>
-            {/*<p>{this.props.id}</p>*/}
+
+            <h2>{this.state.result}</h2>
+
+
                     {data}
+            <div>
+                <p>{pretag}</p>
+
+            </div>
         </div>);
     }
 }

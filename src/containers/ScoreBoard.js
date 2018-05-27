@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "../bootstrap.css"
+import {serverlocation} from "../utils"
 
 export default class ScoreBoard extends Component {
     constructor(props) {
@@ -15,26 +16,29 @@ export default class ScoreBoard extends Component {
 
     componentWillMount(){
         let self=this;
-        fetch('http://127.0.0.1:8000/scoreboard/', {
+        //fetch('http://127.0.0.1:8000/scoreboard/', {
+        //fetch('http://206.189.154.20:9000/scoreboard/', {
+        fetch('http://206.189.154.20:9000/scoreboard/', {
             method: 'GET',
             crossDomain: true,
-            //credentials: 'include',
+            // headers: {
+            //     'Content-type': 'application/json',
+            //      'mode':'no-cors'
+            // },
+            //credentials: true,
             // body: JSON.stringify({
             //     title: this.state.email,
             //     description: this.state.password
             })
 
             .then(function(response) {
-                if(response.status===200){
-                    console.log("200 status");
-                    response.json().then(function (object){
-                        console.log("object", object.message);
-                        self.setState({scores:object.message})
-                    })
-                    //self.props.setlogin(1)
-                }
-            })
-    }
+                response.text().then(function (object){
+                         var obj = JSON.parse(object);
+                         self.setState({scores:obj['scoreboard']})
+                     })
+
+                    });
+        }
 
 
 
@@ -42,9 +46,9 @@ export default class ScoreBoard extends Component {
 
         let tbody=this.state.scores.map((data,i)=>{
             return(<tr>
-                <td>{data.name}</td>
-                <td>{data.score}</td>
-                <td>{data.pos}</td>
+                <td>{data.UserName}</td>
+                <td>{data.Score}</td>
+                <td>{data.CreatedAt}</td>
             </tr>)
         });
 
@@ -56,7 +60,7 @@ export default class ScoreBoard extends Component {
                     <tr>
                         <th>Firstname</th>
                         <th>Score</th>
-                        <th>Position</th>
+                        <th>Last logged in</th>
                     </tr>
                     </thead>
                     <tbody>

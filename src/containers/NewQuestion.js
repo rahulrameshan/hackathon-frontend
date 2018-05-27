@@ -31,14 +31,37 @@ export default class NewQuestion extends Component {
         });
     }
 
-    // Title": "Length of String",
-    // "Description": "Length of String",
-    // "Score": 5,
-    // "Bonus": 5,
-    // "Input1":"hello world",
-    // "Output1":"11",
-    // "Input2":"eucalyptus",
-    // "Output2":"10"
+    handleSubmit = event => {
+        let username= localStorage.getItem('username');
+        let self=this;
+        event.preventDefault();
+        fetch('http://192.168.0.21:9000/add-question/', {
+            method: 'POST',
+            crossDomain: true,
+            //credentials: 'include',
+            // headers: {
+            //     'Content-Type': 'application/json',
+            // },
+            body: JSON.stringify({
+                title: this.state.Title,
+                description: this.state.Description,
+                score:this.props.id,
+                bonus:this.state.Bonus,
+                input1:this.state.Input1,
+                output1:this.state.Output1,
+                input2:this.state.Input2,
+                output2:this.state.Output2
+            })
+        })
+            .then(function(response) {
+                response.text().then(function (object){
+                    var obj = JSON.parse(object);
+                    self.setState({result:obj['message'], output:obj['output']})
+                })
+
+            });
+    }
+
 
     render(){
 
@@ -65,14 +88,14 @@ export default class NewQuestion extends Component {
                     <FormControl
                         value={this.state.Score}
                         onChange={this.handleChange}
-                        type="Text"
+                        type="Number"
                     />
                 </FormGroup> <FormGroup controlId="Bonus" bsSize="large">
                     <ControlLabel>Bonus</ControlLabel>
                     <FormControl
                         value={this.state.Bonus}
                         onChange={this.handleChange}
-                        type="Textarea"
+                        type="Number"
                     />
                 </FormGroup> <FormGroup controlId="Input1" bsSize="large">
                     <ControlLabel>Input1</ControlLabel>
